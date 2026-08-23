@@ -129,148 +129,174 @@
     </section>
 
 
-    <!-- =========================================
-         TELA DE JOGO
-    ========================================== -->
+<!-- =========================================
+     TELA DE JOGO
+========================================== -->
 
-    <section id="gameScreen" class="screen">
+<section id="gameScreen" class="screen">
 
-       <header class="top-bar">
-
-    <button
-        class="icon-button"
-        onclick="openScreen('homeScreen')"
-    >
-        ←
-    </button>
-
-    <div class="level-info">
-
-        <span class="small-label">
-            NÍVEL
-        </span>
-
-        <strong id="gameLevel">
-            1
-        </strong>
-
-    </div>
-
-    <div class="game-actions">
+    <header class="top-bar">
 
         <button
             class="icon-button"
-            onclick="restartLevel()"
-            title="Reiniciar nível"
+            onclick="openScreen('homeScreen')"
         >
-            🔄
+            ←
         </button>
 
-        <button
-            class="icon-button"
-            onclick="toggleSound()"
-            id="soundButton"
-        >
-            🔊
-        </button>
 
-    </div>
+        <div class="level-info">
 
-</header>
+            <span class="small-label">
+                NÍVEL
+            </span>
 
-        </header>
+            <strong id="gameLevel">
+                1
+            </strong>
 
-
-        <main class="game-container">
-
-            <div class="game-status">
-
-                <div class="status-item">
-
-                    <span class="status-label">
-                        ⏱ TEMPO
-                    </span>
-
-                    <strong id="timer">
-                        00:00
-                    </strong>
-
-                </div>
+        </div>
 
 
-                <div class="status-item">
+        <div class="game-actions">
 
-                    <span class="status-label">
-                        ⭐ ESTRELAS
-                    </span>
+            <button
+                class="icon-button"
+                onclick="restartLevel()"
+                title="Reiniciar nível"
+            >
+                🔄
+            </button>
 
-                    <strong id="stars">
+
+            <button
+                class="icon-button"
+                onclick="toggleMusic()"
+                id="musicButton"
+                title="Música"
+            >
+                🎵
+            </button>
+
+
+            <button
+                class="icon-button"
+                onclick="toggleSound()"
+                id="soundButton"
+                title="Sons"
+            >
+                🔊
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <main class="game-container">
+
+        <div class="game-status">
+
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    ⏱ TEMPO
+                </span>
+
+                <strong id="timer">
+                    00:00
+                </strong>
+
+            </div>
+
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    ⭐ ESTRELAS
+                </span>
+
+                <strong id="stars">
+                    0
+                </strong>
+
+            </div>
+
+
+            <div class="status-item">
+
+                <span class="status-label">
+                    🎯 PALAVRAS
+                </span>
+
+                <strong>
+
+                    <span id="foundWords">
                         0
-                    </strong>
-
-                </div>
-
-
-                <div class="status-item">
-
-                    <span class="status-label">
-                        🎯 PALAVRAS
                     </span>
 
-                    <strong>
-                        <span id="foundWords">
-                            0
-                        </span>
-                        /
-                        <span id="totalWords">
-                            0
-                        </span>
-                    </strong>
+                    /
 
-                </div>
+                    <span id="totalWords">
+                        0
+                    </span>
+
+                </strong>
 
             </div>
 
 
-            <!-- TABULEIRO SERÁ CONSTRUÍDO
-                 NA ETAPA 2 -->
-
-            <div class="game-board-container">
-
-    <div id="gameBoard" class="game-board"></div>
-
-</div>
+        </div>
 
 
-            <div class="words-panel">
+        <!-- =========================================
+             TABULEIRO
+        ========================================== -->
 
-                <h3>
-                    🔎 PALAVRAS PARA ENCONTRAR
-                </h3>
+        <div class="game-board-container">
 
-                <div id="wordsList">
+            <div
+                id="gameBoard"
+                class="game-board"
+            ></div>
 
-                    <div class="word-placeholder">
-                        AMIZADE
-                    </div>
+        </div>
 
-                    <div class="word-placeholder">
-                        SABEDORIA
-                    </div>
 
-                    <div class="word-placeholder">
-                        MEMÓRIA
-                    </div>
+        <!-- =========================================
+             PALAVRAS
+        ========================================== -->
 
+        <div class="words-panel">
+
+            <h3>
+                🔎 PALAVRAS PARA ENCONTRAR
+            </h3>
+
+
+            <div id="wordsList">
+
+                <div class="word-placeholder">
+                    AMIZADE
+                </div>
+
+                <div class="word-placeholder">
+                    SABEDORIA
+                </div>
+
+                <div class="word-placeholder">
+                    MEMÓRIA
                 </div>
 
             </div>
 
-        </main>
-
-    </section>
+        </div>
 
 
+    </main>
+
+</section>
     <!-- =========================================
          TELA DE NÍVEIS
     ========================================== -->
