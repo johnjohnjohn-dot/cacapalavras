@@ -2577,7 +2577,7 @@ function closeRecordModal() {
 }
 
 
-function function saveRecord() {
+function saveRecord() {
 
     const nameInput =
         document.getElementById(
@@ -3639,85 +3639,55 @@ function getActiveWordBank() {
    NOVA SELEÇÃO DE PALAVRAS
 ===================================================== */
 
-function selectWords(
-    count,
-    size
-) {
+function selectWords(count, size) {
 
-    const bank =
-        getActiveWordBank();
+    const bank = getActiveWordBank();
 
+    /*
+       Só aceita palavras que realmente
+       cabem no tabuleiro.
+    */
+    const possible = bank.filter(word => {
 
-    const possible =
-        bank.filter(
-            word => {
-
-                return (
-
-                    word.length >= 5 &&
-
-                    word.length <= size
-
-                );
-
-            }
+        return (
+            word.length >= 5 &&
+            word.length <= size
         );
 
+    });
 
-    let pool =
-        possible;
-
-
-    if (
-        pool.length < count
-    ) {
-
-        pool =
-            bank.filter(
-                word =>
-                    word.length >= 5
-            );
-
-    }
-
-
-    const shuffled =
-        [...pool];
-
+    /*
+       Embaralha as palavras.
+    */
+    const shuffled = [...possible];
 
     for (
-        let i =
-            shuffled.length - 1;
+        let i = shuffled.length - 1;
         i > 0;
         i--
     ) {
 
-        const j =
-            Math.floor(
-                Math.random() *
-                (i + 1)
-            );
-
+        const j = Math.floor(
+            Math.random() * (i + 1)
+        );
 
         [
             shuffled[i],
             shuffled[j]
-        ] =
-        [
+        ] = [
             shuffled[j],
             shuffled[i]
         ];
 
     }
 
-
-    return shuffled.slice(
-        0,
-        count
-    );
+    /*
+       Retorna somente a quantidade
+       que realmente poderá ser colocada.
+    */
+    return shuffled.slice(0, count);
 
 }
-
 
 /* =====================================================
    PWA — SERVICE WORKER
@@ -3810,7 +3780,7 @@ function restartLevel() {
 
 function startGameWithMusic() {
 
-    startBackgroundMusic();
+   startMusic() {
 
     openScreen(
         "gameScreen"
