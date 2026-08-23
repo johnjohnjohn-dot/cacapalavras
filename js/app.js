@@ -3118,3 +3118,24 @@ if (
     );
 
 }
+/* =====================================================
+   REINICIAR NÍVEL
+===================================================== */
+
+function restartLevel() {
+
+    const confirmRestart =
+        confirm(
+            "🔄 Reiniciar este nível?\n\n" +
+            "Todo o progresso deste nível será perdido."
+        );
+
+    if (!confirmRestart) {
+        return;
+    }
+
+    startLevel(
+        gameData.currentLevel
+    );
+
+}
