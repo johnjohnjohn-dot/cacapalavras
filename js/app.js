@@ -3752,6 +3752,7 @@ if (
     );
 
 }
+
 /* =====================================================
    REINICIAR NÍVEL
 ===================================================== */
@@ -3780,7 +3781,7 @@ function restartLevel() {
 
 function startGameWithMusic() {
 
-   startMusic() {
+    startMusic();
 
     openScreen(
         "gameScreen"
