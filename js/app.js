@@ -3803,3 +3803,17 @@ function restartLevel() {
     );
 
 }
+
+/* =====================================================
+   INICIAR JOGO COM MÚSICA
+===================================================== */
+
+function startGameWithMusic() {
+
+    startBackgroundMusic();
+
+    openScreen(
+        "gameScreen"
+    );
+
+}
