@@ -2584,7 +2584,701 @@ function saveRecord() {
             "playerName"
         );
 
+/* =====================================================
+   MÚSICA DE FUNDO — PIANO CLÁSSICO
+   Web Audio API
+===================================================== */
 
+let musicContext = null;
+let musicMasterGain = null;
+let musicTimer = null;
+let musicStarted = false;
+
+let musicEnabled =
+    localStorage.getItem("musicEnabled") !== "false";
+
+
+/* =====================================================
+   COMPOSIÇÃO
+===================================================== */
+
+const MUSIC_TEMPO = 72;
+
+const MUSIC_BEAT =
+    60 / MUSIC_TEMPO;
+
+
+/*
+   Melodia em notas MIDI.
+
+   A composição é original e foi criada
+   para ser suave e repetitiva.
+*/
+
+const MUSIC_MELODY = [
+
+    // Compasso 1
+    ["E4", 1],
+    ["G4", 1],
+    ["B4", 2],
+
+    // Compasso 2
+    ["A4", 1],
+    ["G4", 1],
+    ["E4", 2],
+
+    // Compasso 3
+    ["D4", 1],
+    ["F#4", 1],
+    ["A4", 2],
+
+    // Compasso 4
+    ["G4", 1],
+    ["F#4", 1],
+    ["D4", 2],
+
+
+    // Compasso 5
+    ["C4", 1],
+    ["E4", 1],
+    ["G4", 2],
+
+    // Compasso 6
+    ["F#4", 1],
+    ["A4", 1],
+    ["C5", 2],
+
+    // Compasso 7
+    ["B4", 1],
+    ["A4", 1],
+    ["G4", 1],
+    ["E4", 1],
+
+    // Compasso 8
+    ["D4", 2],
+    ["E4", 1],
+    ["G4", 1],
+
+
+    // Segunda parte
+
+    ["B4", 1],
+    ["D5", 1],
+    ["G5", 2],
+
+    ["F#5", 1],
+    ["E5", 1],
+    ["D5", 2],
+
+    ["C5", 1],
+    ["E5", 1],
+    ["A5", 2],
+
+    ["G5", 1],
+    ["F#5", 1],
+    ["E5", 2],
+
+
+    ["D5", 1],
+    ["F#5", 1],
+    ["A5", 2],
+
+    ["G5", 1],
+    ["E5", 1],
+    ["C5", 2],
+
+    ["B4", 1],
+    ["A4", 1],
+    ["G4", 2],
+
+    ["E4", 4]
+
+];
+
+
+/* =====================================================
+   ACORDES
+===================================================== */
+
+const MUSIC_CHORDS = [
+
+    ["C3", "G3", "C4", "E4"],
+    ["G2", "D3", "G3", "B3"],
+    ["A2", "E3", "A3", "C4"],
+    ["F2", "C3", "F3", "A3"],
+
+    ["C3", "G3", "C4", "E4"],
+    ["A2", "E3", "A3", "C4"],
+    ["D3", "A3", "D4", "F#4"],
+    ["G2", "D3", "G3", "B3"]
+
+];
+
+
+/* =====================================================
+   CONVERTER NOTA PARA FREQUÊNCIA
+===================================================== */
+
+function noteFrequency(note) {
+
+    const notes = {
+
+        "C": 0,
+        "C#": 1,
+        "D": 2,
+        "D#": 3,
+        "E": 4,
+        "F": 5,
+        "F#": 6,
+        "G": 7,
+        "G#": 8,
+        "A": 9,
+        "A#": 10,
+        "B": 11
+
+    };
+
+
+    const match =
+        note.match(
+            /^([A-G]#?)(\d)$/
+        );
+
+
+    if (!match) {
+        return 440;
+    }
+
+
+    const name = match[1];
+
+    const octave =
+        Number(match[2]);
+
+
+    const midi =
+        (octave + 1) * 12 +
+        notes[name];
+
+
+    return (
+        440 *
+        Math.pow(
+            2,
+            (midi - 69) / 12
+        )
+    );
+
+}
+
+
+/* =====================================================
+   CRIAR SOM DE PIANO
+===================================================== */
+
+function playPianoNote(
+    note,
+    startTime,
+    duration,
+    volume = 0.12
+) {
+
+    if (!musicContext) {
+        return;
+    }
+
+
+    const frequency =
+        noteFrequency(note);
+
+
+    const oscillator1 =
+        musicContext.createOscillator();
+
+
+    const oscillator2 =
+        musicContext.createOscillator();
+
+
+    const gain =
+        musicContext.createGain();
+
+
+    const filter =
+        musicContext.createBiquadFilter();
+
+
+    oscillator1.type =
+        "triangle";
+
+
+    oscillator2.type =
+        "sine";
+
+
+    oscillator1.frequency.value =
+        frequency;
+
+
+    oscillator2.frequency.value =
+        frequency * 2;
+
+
+    oscillator2.detune.value =
+        3;
+
+
+    filter.type =
+        "lowpass";
+
+
+    filter.frequency.value =
+        3200;
+
+
+    filter.Q.value =
+        0.7;
+
+
+    oscillator1.connect(
+        filter
+    );
+
+
+    oscillator2.connect(
+        filter
+    );
+
+
+    filter.connect(
+        gain
+    );
+
+
+    gain.connect(
+        musicMasterGain
+    );
+
+
+    /*
+       Envelope semelhante ao ataque
+       de um piano.
+    */
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        startTime
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        volume,
+        startTime + 0.015
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        volume * 0.45,
+        startTime + 0.25
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        startTime + duration
+    );
+
+
+    oscillator1.start(
+        startTime
+    );
+
+
+    oscillator2.start(
+        startTime
+    );
+
+
+    oscillator1.stop(
+        startTime + duration
+    );
+
+
+    oscillator2.stop(
+        startTime + duration
+    );
+
+}
+
+
+/* =====================================================
+   CRIAR ACORDE
+===================================================== */
+
+function playChord(
+    chord,
+    startTime,
+    duration
+) {
+
+    chord.forEach(
+        note => {
+
+            playPianoNote(
+                note,
+                startTime,
+                duration,
+                0.025
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   TOCAR COMPOSIÇÃO
+===================================================== */
+
+function scheduleMusic() {
+
+    if (
+        !musicContext ||
+        !musicMasterGain ||
+        !musicEnabled
+    ) {
+
+        return;
+
+    }
+
+
+    const start =
+        musicContext.currentTime + 0.05;
+
+
+    let time =
+        start;
+
+
+    /*
+       Tocar acordes.
+    */
+
+    for (
+        let i = 0;
+        i < MUSIC_CHORDS.length;
+        i++
+    ) {
+
+        playChord(
+            MUSIC_CHORDS[i],
+            time,
+            MUSIC_BEAT * 4
+        );
+
+
+        time +=
+            MUSIC_BEAT * 4;
+
+    }
+
+
+    /*
+       Tocar melodia.
+    */
+
+    time = start;
+
+
+    MUSIC_MELODY.forEach(
+        item => {
+
+            const note =
+                item[0];
+
+
+            const beats =
+                item[1];
+
+
+            const duration =
+                beats * MUSIC_BEAT;
+
+
+            playPianoNote(
+                note,
+                time,
+                duration * 0.95,
+                0.11
+            );
+
+
+            time += duration;
+
+        }
+    );
+
+
+    /*
+       Agenda novamente a composição
+       quando terminar.
+    */
+
+    const totalDuration =
+        time - start;
+
+
+    musicTimer =
+        setTimeout(
+            () => {
+
+                if (musicEnabled) {
+
+                    scheduleMusic();
+
+                }
+
+            },
+            (totalDuration - 0.15) * 1000
+        );
+
+}
+
+
+/* =====================================================
+   INICIAR MÚSICA
+===================================================== */
+
+function startMusic() {
+
+    if (!musicEnabled) {
+        return;
+    }
+
+
+    if (!musicContext) {
+
+        const AudioContextClass =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+
+        if (!AudioContextClass) {
+
+            console.log(
+                "Web Audio API não disponível."
+            );
+
+            return;
+
+        }
+
+
+        musicContext =
+            new AudioContextClass();
+
+
+        musicMasterGain =
+            musicContext.createGain();
+
+
+        musicMasterGain.gain.value =
+            0.35;
+
+
+        musicMasterGain.connect(
+            musicContext.destination
+        );
+
+    }
+
+
+    if (
+        musicContext.state ===
+        "suspended"
+    ) {
+
+        musicContext.resume();
+
+    }
+
+
+    if (musicStarted) {
+        return;
+    }
+
+
+    musicStarted = true;
+
+
+    scheduleMusic();
+
+    updateMusicButton();
+
+}
+
+
+/* =====================================================
+   PARAR MÚSICA
+===================================================== */
+
+function stopMusic() {
+
+    musicEnabled = false;
+
+
+    localStorage.setItem(
+        "musicEnabled",
+        "false"
+    );
+
+
+    if (musicTimer) {
+
+        clearTimeout(
+            musicTimer
+        );
+
+        musicTimer = null;
+
+    }
+
+
+    if (musicMasterGain) {
+
+        musicMasterGain.gain.cancelScheduledValues(
+            musicContext.currentTime
+        );
+
+
+        musicMasterGain.gain.setTargetAtTime(
+            0,
+            musicContext.currentTime,
+            0.08
+        );
+
+    }
+
+
+    musicStarted = false;
+
+
+    updateMusicButton();
+
+}
+
+
+/* =====================================================
+   LIGAR / DESLIGAR
+===================================================== */
+
+function toggleMusic() {
+
+    if (musicEnabled) {
+
+        stopMusic();
+
+        return;
+
+    }
+
+
+    musicEnabled = true;
+
+
+    localStorage.setItem(
+        "musicEnabled",
+        "true"
+    );
+
+
+    if (
+        musicMasterGain &&
+        musicContext
+    ) {
+
+        musicMasterGain.gain.cancelScheduledValues(
+            musicContext.currentTime
+        );
+
+
+        musicMasterGain.gain.setTargetAtTime(
+            0.35,
+            musicContext.currentTime,
+            0.08
+        );
+
+    }
+
+
+    startMusic();
+
+}
+
+
+/* =====================================================
+   ATUALIZAR BOTÃO
+===================================================== */
+
+function updateMusicButton() {
+
+    const button =
+        document.getElementById(
+            "musicButton"
+        );
+
+
+    if (!button) {
+        return;
+    }
+
+
+    button.textContent =
+        musicEnabled
+            ? "🎵"
+            : "🔇";
+
+}
+
+
+/* =====================================================
+   INICIAR APÓS INTERAÇÃO DO USUÁRIO
+===================================================== */
+
+document.addEventListener(
+    "click",
+    () => {
+
+        if (
+            musicEnabled &&
+            !musicStarted
+        ) {
+
+            startMusic();
+
+        }
+
+    },
+    {
+        once: false
+    }
+);
+
+
+/* =====================================================
+   INICIALIZAR BOTÃO
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        updateMusicButton();
+
+    }
+);
     const recordTime =
         document.getElementById(
             "recordTime"
