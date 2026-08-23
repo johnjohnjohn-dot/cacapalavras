@@ -135,34 +135,48 @@
 
     <section id="gameScreen" class="screen">
 
-        <header class="top-bar">
+       <header class="top-bar">
 
-            <button
-                class="icon-button"
-                onclick="openScreen('homeScreen')"
-            >
-                ←
-            </button>
+    <button
+        class="icon-button"
+        onclick="openScreen('homeScreen')"
+    >
+        ←
+    </button>
 
-            <div class="level-info">
+    <div class="level-info">
 
-                <span class="small-label">
-                    NÍVEL
-                </span>
+        <span class="small-label">
+            NÍVEL
+        </span>
 
-                <strong id="gameLevel">
-                    1
-                </strong>
+        <strong id="gameLevel">
+            1
+        </strong>
 
-            </div>
+    </div>
 
-            <button
-                class="icon-button"
-                onclick="toggleSound()"
-                id="soundButton"
-            >
-                🔊
-            </button>
+    <div class="game-actions">
+
+        <button
+            class="icon-button"
+            onclick="restartLevel()"
+            title="Reiniciar nível"
+        >
+            🔄
+        </button>
+
+        <button
+            class="icon-button"
+            onclick="toggleSound()"
+            id="soundButton"
+        >
+            🔊
+        </button>
+
+    </div>
+
+</header>
 
         </header>
 
