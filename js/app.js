@@ -1,6 +1,6 @@
 /* =====================================================
    CAÇA-PALAVRAS
-   ETAPA 2 — MOTOR DO JOGO
+   MOTOR DO JOGO
 ===================================================== */
 
 
@@ -191,7 +191,7 @@ const DIRECTIONS = [
     { dr: 0,  dc: -1 },
 
     { dr: 1,  dc: 0  },
-    { dr: -1, dc: 0  },
+    { dr: -1, dc: 0 },
 
     { dr: 1,  dc: 1  },
     { dr: 1,  dc: -1 },
@@ -460,7 +460,6 @@ function startLevel(level) {
 }
 
 
-
 /* =====================================================
    CRIAR TABULEIRO
 ===================================================== */
@@ -502,11 +501,6 @@ function generateBoard() {
 
 
         if (!success) {
-
-            /*
-               Se uma palavra não couber,
-               tentamos novamente.
-            */
 
             continue;
 
@@ -771,6 +765,21 @@ function renderBoard() {
                 board[row][col];
 
 
+            /*
+               Importante para ChromeOS,
+               mouse e touchscreen.
+            */
+
+            cell.style.touchAction =
+                "none";
+
+            cell.style.userSelect =
+                "none";
+
+            cell.style.webkitUserSelect =
+                "none";
+
+
             container.appendChild(
                 cell
             );
@@ -786,7 +795,7 @@ function renderBoard() {
 
 
 /* =====================================================
-   EVENTOS DE TOQUE E MOUSE
+   EVENTOS DO TABULEIRO
 ===================================================== */
 
 function attachBoardEvents() {
@@ -798,6 +807,35 @@ function attachBoardEvents() {
 
 
     if (!boardElement) return;
+
+
+    /*
+       Remove handlers antigos.
+    */
+
+    boardElement.onpointerdown = null;
+
+    boardElement.onpointermove = null;
+
+    boardElement.onpointerup = null;
+
+    boardElement.onpointercancel = null;
+
+
+    /*
+       Garante que o navegador não tente
+       interpretar o movimento como seleção,
+       scroll ou gesto.
+    */
+
+    boardElement.style.touchAction =
+        "none";
+
+    boardElement.style.userSelect =
+        "none";
+
+    boardElement.style.webkitUserSelect =
+        "none";
 
 
     boardElement.onpointerdown =
@@ -819,41 +857,125 @@ function attachBoardEvents() {
 
 
 /* =====================================================
-   PEGAR CÉLULA PELO PONTO
+   PEGAR CÉLULA PELA POSIÇÃO DO MOUSE/TOQUE
 ===================================================== */
 
 function getCellFromPoint(x, y) {
 
-    const element =
-        document.elementFromPoint(
-            x,
-            y
+    const boardElement =
+        document.getElementById(
+            "gameBoard"
         );
 
+
+    if (!boardElement) {
+
+        return null;
+
+    }
+
+
+    const rect =
+        boardElement.getBoundingClientRect();
+
+
+    /*
+       Verifica se o ponto está dentro
+       do tabuleiro.
+    */
+
+    if (
+        x < rect.left ||
+        x > rect.right ||
+        y < rect.top ||
+        y > rect.bottom
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+       Calcula diretamente qual célula
+       foi atingida.
+
+       Não usamos elementFromPoint().
+    */
+
+    const relativeX =
+        x - rect.left;
+
+
+    const relativeY =
+        y - rect.top;
+
+
+    const cellWidth =
+        rect.width / boardSize;
+
+
+    const cellHeight =
+        rect.height / boardSize;
+
+
+    let col =
+        Math.floor(
+            relativeX / cellWidth
+        );
+
+
+    let row =
+        Math.floor(
+            relativeY / cellHeight
+        );
+
+
+    /*
+       Proteção contra arredondamentos.
+    */
+
+    col =
+        Math.max(
+            0,
+            Math.min(
+                boardSize - 1,
+                col
+            )
+        );
+
+
+    row =
+        Math.max(
+            0,
+            Math.min(
+                boardSize - 1,
+                row
+            )
+        );
+
+
+    const element =
+        getCellElement(
+            row,
+            col
+        );
+
+
     if (!element) {
+
         return null;
+
     }
 
-    const cell =
-        element.closest(".letter-cell");
-
-    if (!cell) {
-        return null;
-    }
 
     return {
 
-        row:
-            Number(
-                cell.dataset.row
-            ),
+        row,
 
-        col:
-            Number(
-                cell.dataset.col
-            ),
+        col,
 
-        element: cell
+        element
 
     };
 
@@ -866,7 +988,50 @@ function getCellFromPoint(x, y) {
 
 function handlePointerDown(event) {
 
+    /*
+       Impede seleção de texto,
+       arrastar página etc.
+    */
+
     event.preventDefault();
+
+
+    /*
+       Mantém o pointer preso ao tabuleiro
+       durante o arrasto.
+    */
+
+    const boardElement =
+        document.getElementById(
+            "gameBoard"
+        );
+
+
+    if (
+        boardElement &&
+        boardElement.setPointerCapture &&
+        event.pointerId !== undefined
+    ) {
+
+        try {
+
+            boardElement.setPointerCapture(
+                event.pointerId
+            );
+
+        }
+
+        catch (error) {
+
+            /*
+               Alguns ambientes podem
+               não permitir pointer capture.
+               Nesse caso continuamos normalmente.
+            */
+
+        }
+
+    }
 
 
     const cell =
@@ -892,7 +1057,12 @@ function handlePointerDown(event) {
 
 
     selectionCells = [
-        selectionStart
+
+        {
+            row: cell.row,
+            col: cell.col
+        }
+
     ];
 
 
@@ -905,7 +1075,7 @@ function handlePointerDown(event) {
 
 
 /* =====================================================
-   MOVIMENTO
+   MOVIMENTO DA SELEÇÃO
 ===================================================== */
 
 function handlePointerMove(event) {
@@ -949,7 +1119,7 @@ function handlePointerMove(event) {
 
 
 /* =====================================================
-   SOLTAR DEDO
+   FINALIZAR SELEÇÃO
 ===================================================== */
 
 function handlePointerUp(event) {
@@ -960,24 +1130,102 @@ function handlePointerUp(event) {
     event.preventDefault();
 
 
+    /*
+       Libera o pointer capture.
+    */
+
+    const boardElement =
+        document.getElementById(
+            "gameBoard"
+        );
+
+
+    if (
+        boardElement &&
+        boardElement.releasePointerCapture &&
+        event.pointerId !== undefined
+    ) {
+
+        try {
+
+            if (
+                boardElement.hasPointerCapture(
+                    event.pointerId
+                )
+            ) {
+
+                boardElement.releasePointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+        }
+
+    }
+
+
     isSelecting = false;
 
 
     checkSelection();
 
-
 }
 
 
 /* =====================================================
-   CANCELAR
+   CANCELAR SELEÇÃO
 ===================================================== */
 
-function handlePointerCancel() {
+function handlePointerCancel(event) {
 
     isSelecting = false;
 
+    selectionStart = null;
+
+    selectionCells = [];
+
     clearSelection();
+
+
+    const boardElement =
+        document.getElementById(
+            "gameBoard"
+        );
+
+
+    if (
+        boardElement &&
+        boardElement.releasePointerCapture &&
+        event &&
+        event.pointerId !== undefined
+    ) {
+
+        try {
+
+            if (
+                boardElement.hasPointerCapture(
+                    event.pointerId
+                )
+            ) {
+
+                boardElement.releasePointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+        }
+
+    }
 
 }
 
@@ -1524,13 +1772,6 @@ function completeLevel() {
     stopTimer();
 
 
-    /*
-       Sistema simples de estrelas.
-
-       Futuramente vamos calcular
-       estrelas pelo tempo.
-    */
-
     let earnedStars = 3;
 
 
@@ -1555,10 +1796,6 @@ function completeLevel() {
     gameData.totalStars +=
         earnedStars;
 
-
-    /*
-       Desbloquear próximo nível.
-    */
 
     if (
         gameData.currentLevel <
@@ -2223,7 +2460,7 @@ function updateFontSize() {
 
 
 /* =====================================================
-   HALL DA FAMA — BASE
+   HALL DA FAMA
 ===================================================== */
 
 function showHall(type) {
@@ -2310,22 +2547,32 @@ function openRecordModal(time) {
     }
 
 
-    modal.classList.add(
-        "show"
-    );
+    if (modal) {
+
+        modal.classList.add(
+            "show"
+        );
+
+    }
 
 }
 
 
 function closeRecordModal() {
 
-    document
-        .getElementById(
+    const modal =
+        document.getElementById(
             "recordModal"
-        )
-        .classList.remove(
+        );
+
+
+    if (modal) {
+
+        modal.classList.remove(
             "show"
         );
+
+    }
 
 }
 
@@ -2338,10 +2585,21 @@ function saveRecord() {
         );
 
 
-    const time =
+    const recordTime =
         document.getElementById(
             "recordTime"
-        ).textContent;
+        );
+
+
+    if (!nameInput || !recordTime) {
+
+        return;
+
+    }
+
+
+    const time =
+        recordTime.textContent;
 
 
     const name =
@@ -2390,15 +2648,10 @@ function saveRecord() {
 
 }
 
+
 /* =====================================================
-   ETAPA 3
    BANCO DE PALAVRAS PERSONALIZADO
 ===================================================== */
-
-
-/*
-   Palavras fornecidas pelo usuário.
-*/
 
 let customWordBank = [];
 
@@ -2416,6 +2669,7 @@ function loadCustomWordBank() {
                 "customWordBank"
             );
 
+
         if (saved) {
 
             customWordBank =
@@ -2423,7 +2677,9 @@ function loadCustomWordBank() {
 
         }
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         customWordBank = [];
 
@@ -2489,10 +2745,6 @@ function extractWords(text) {
     }
 
 
-    /*
-       Divide o texto em palavras.
-    */
-
     const rawWords =
         text.match(
             /[A-Za-zÀ-ÿ]+/g
@@ -2509,29 +2761,16 @@ function extractWords(text) {
                     )
             )
 
-            /*
-               Mínimo de 5 letras.
-            */
-
             .filter(
                 word =>
                     word.length >= 5
             )
-
-            /*
-               Evita palavras gigantes
-               demais para o tabuleiro.
-            */
 
             .filter(
                 word =>
                     word.length <= 15
             );
 
-
-    /*
-       Remove duplicadas.
-    */
 
     return [
         ...new Set(
@@ -2569,11 +2808,15 @@ function processSourceText() {
 
     if (!text) {
 
-        result.innerHTML =
+        if (result) {
 
-            `<span class="import-warning">
-                Cole algum texto primeiro.
-             </span>`;
+            result.innerHTML =
+
+                `<span class="import-warning">
+                    Cole algum texto primeiro.
+                 </span>`;
+
+        }
 
         return;
 
@@ -2588,12 +2831,16 @@ function processSourceText() {
 
     if (!words.length) {
 
-        result.innerHTML =
+        if (result) {
 
-            `<span class="import-warning">
-                Não encontrei palavras com
-                5 letras ou mais.
-             </span>`;
+            result.innerHTML =
+
+                `<span class="import-warning">
+                    Não encontrei palavras com
+                    5 letras ou mais.
+                 </span>`;
+
+        }
 
         return;
 
@@ -2607,18 +2854,22 @@ function processSourceText() {
     saveCustomWordBank();
 
 
-    result.innerHTML =
+    if (result) {
 
-        `<span class="import-success">
-            ✓ Texto processado com sucesso!
-         </span>
-         <br><br>
-         Foram encontradas
-         <strong>${words.length}</strong>
-         palavras.
-         <br><br>
-         O próximo caça-palavras usará
-         automaticamente esse banco.`;
+        result.innerHTML =
+
+            `<span class="import-success">
+                ✓ Texto processado com sucesso!
+             </span>
+             <br><br>
+             Foram encontradas
+             <strong>${words.length}</strong>
+             palavras.
+             <br><br>
+             O próximo caça-palavras usará
+             automaticamente esse banco.`;
+
+    }
 
 }
 
@@ -2626,6 +2877,7 @@ function processSourceText() {
 /* =====================================================
    IMPORTAR ARQUIVO TXT
 ===================================================== */
+
 function setupFileImport() {
 
     const fileInput =
@@ -2698,16 +2950,12 @@ function setupFileImport() {
 
 }
 
+
 /* =====================================================
    BANCO USADO PELO JOGO
 ===================================================== */
 
 function getActiveWordBank() {
-
-    /*
-       Se o usuário importou palavras,
-       elas têm prioridade.
-    */
 
     if (
         customWordBank.length >= 5
@@ -2752,12 +3000,6 @@ function selectWords(
         );
 
 
-    /*
-       Se não houver palavras suficientes
-       para o tamanho atual, usamos palavras
-       menores e permitimos níveis mais flexíveis.
-    */
-
     let pool =
         possible;
 
@@ -2774,10 +3016,6 @@ function selectWords(
 
     }
 
-
-    /*
-       Embaralhamento Fisher-Yates.
-    */
 
     const shuffled =
         [...pool];
@@ -2815,6 +3053,8 @@ function selectWords(
     );
 
 }
+
+
 /* =====================================================
    PWA — SERVICE WORKER
 ===================================================== */
@@ -2827,32 +3067,54 @@ if (
         "load",
         () => {
 
-            navigator.serviceWorker
-                .register(
-                    "./service-worker.js"
-                )
-                .then(
-                    registration => {
+            /*
+               Service Worker só funciona
+               em HTTPS ou localhost.
 
-                        console.log(
-                            "PWA ativado:",
-                            registration.scope
-                        );
+               Quando abrimos o index.html
+               diretamente pelo arquivo,
+               o protocolo é file:// e o navegador
+               bloqueia o registro.
 
-                    }
-                )
-                .catch(
-                    error => {
+               Por isso verificamos o protocolo
+               antes de tentar registrar.
+            */
 
-                        console.error(
-                            "Erro no PWA:",
-                            error
-                        );
+            if (
+                location.protocol === "https:" ||
+                location.hostname === "localhost" ||
+                location.hostname === "127.0.0.1"
+            ) {
 
-                    }
-                );
+                navigator.serviceWorker
+                    .register(
+                        "./service-worker.js"
+                    )
+                    .then(
+                        registration => {
+
+                            console.log(
+                                "PWA ativado:",
+                                registration.scope
+                            );
+
+                        }
+                    )
+                    .catch(
+                        error => {
+
+                            console.error(
+                                "Erro no PWA:",
+                                error
+                            );
+
+                        }
+                    );
+
+            }
 
         }
+
     );
 
 }
