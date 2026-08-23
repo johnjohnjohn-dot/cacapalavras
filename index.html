@@ -1,0 +1,612 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+    name="theme-color"
+    content="#5a3825"
+>
+    <link
+    rel="manifest"
+    href="manifest.json"
+>
+
+    
+    <meta name="theme-color" content="#4b2d1d">
+
+    <title>Caça-Palavras</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<div id="app">
+
+    <!-- =========================================
+         TELA INICIAL
+    ========================================== -->
+
+    <section id="homeScreen" class="screen active">
+
+        <div class="home-container">
+
+            <div class="logo">
+
+                <div class="logo-icon">🔎</div>
+
+                <h1>CAÇA-PALAVRAS</h1>
+
+                <p>Exercite sua mente todos os dias</p>
+
+            </div>
+
+            <div class="main-menu">
+
+                <button
+                    class="menu-button primary"
+                    onclick="openScreen('gameScreen')"
+                >
+                    <span class="menu-icon">▶</span>
+
+                    <span>JOGAR</span>
+
+                    <small>
+                        Continuar do nível
+                        <span id="currentLevelHome">1</span>
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="menu-button"
+                    onclick="openScreen('levelsScreen')"
+                >
+                    <span class="menu-icon">📚</span>
+
+                    <span>100 NÍVEIS</span>
+
+                    <small>
+                        Escolha seu desafio
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="menu-button"
+                    onclick="openScreen('hallScreen')"
+                >
+                    <span class="menu-icon">🏆</span>
+
+                    <span>HALL DA FAMA</span>
+
+                    <small>
+                        Veja os melhores recordes
+                    </small>
+
+                </button>
+
+
+                <button
+                    class="menu-button"
+                    onclick="openScreen('settingsScreen')"
+                >
+                    <span class="menu-icon">⚙️</span>
+
+                    <span>CONFIGURAÇÕES</span>
+
+                    <small>
+                        Personalize sua experiência
+                    </small>
+
+                </button>
+
+            </div>
+
+            <div class="home-footer">
+
+                <span>⭐ <span id="totalStars">0</span> estrelas</span>
+
+                <span>🏁 Nível <span id="currentLevelFooter">1</span></span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         TELA DE JOGO
+    ========================================== -->
+
+    <section id="gameScreen" class="screen">
+
+        <header class="top-bar">
+
+            <button
+                class="icon-button"
+                onclick="openScreen('homeScreen')"
+            >
+                ←
+            </button>
+
+            <div class="level-info">
+
+                <span class="small-label">
+                    NÍVEL
+                </span>
+
+                <strong id="gameLevel">
+                    1
+                </strong>
+
+            </div>
+
+            <button
+                class="icon-button"
+                onclick="toggleSound()"
+                id="soundButton"
+            >
+                🔊
+            </button>
+
+        </header>
+
+
+        <main class="game-container">
+
+            <div class="game-status">
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        ⏱ TEMPO
+                    </span>
+
+                    <strong id="timer">
+                        00:00
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        ⭐ ESTRELAS
+                    </span>
+
+                    <strong id="stars">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="status-item">
+
+                    <span class="status-label">
+                        🎯 PALAVRAS
+                    </span>
+
+                    <strong>
+                        <span id="foundWords">
+                            0
+                        </span>
+                        /
+                        <span id="totalWords">
+                            0
+                        </span>
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- TABULEIRO SERÁ CONSTRUÍDO
+                 NA ETAPA 2 -->
+
+            <div class="game-board-container">
+
+    <div id="gameBoard" class="game-board"></div>
+
+</div>
+
+
+            <div class="words-panel">
+
+                <h3>
+                    🔎 PALAVRAS PARA ENCONTRAR
+                </h3>
+
+                <div id="wordsList">
+
+                    <div class="word-placeholder">
+                        AMIZADE
+                    </div>
+
+                    <div class="word-placeholder">
+                        SABEDORIA
+                    </div>
+
+                    <div class="word-placeholder">
+                        MEMÓRIA
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </section>
+
+
+    <!-- =========================================
+         TELA DE NÍVEIS
+    ========================================== -->
+
+    <section id="levelsScreen" class="screen">
+
+        <header class="top-bar">
+
+            <button
+                class="icon-button"
+                onclick="openScreen('homeScreen')"
+            >
+                ←
+            </button>
+
+            <h2>
+                📚 100 NÍVEIS
+            </h2>
+
+            <div class="header-space"></div>
+
+        </header>
+
+
+        <main class="page-container">
+
+            <p class="page-description">
+
+                Complete os níveis e desbloqueie
+                novos desafios.
+
+            </p>
+
+
+            <div
+                id="levelsGrid"
+                class="levels-grid"
+            >
+            </div>
+
+        </main>
+
+    </section>
+
+
+    <!-- =========================================
+         HALL DA FAMA
+    ========================================== -->
+
+    <section id="hallScreen" class="screen">
+
+        <header class="top-bar">
+
+            <button
+                class="icon-button"
+                onclick="openScreen('homeScreen')"
+            >
+                ←
+            </button>
+
+            <h2>
+                🏆 HALL DA FAMA
+            </h2>
+
+            <div class="header-space"></div>
+
+        </header>
+
+
+        <main class="page-container">
+
+            <div class="hall-tabs">
+
+                <button
+                    class="tab-button active"
+                    onclick="showHall('general')"
+                >
+                    🌟 GERAL
+                </button>
+
+                <button
+                    class="tab-button"
+                    onclick="showHall('levels')"
+                >
+                    🎯 POR NÍVEL
+                </button>
+
+            </div>
+
+
+            <div
+                id="hallContent"
+                class="hall-content"
+            >
+
+                <div class="empty-hall">
+
+                    <div class="empty-icon">
+                        🏆
+                    </div>
+
+                    <h3>
+                        O Hall da Fama está esperando!
+                    </h3>
+
+                    <p>
+                        Complete um nível e quebre
+                        um recorde para registrar
+                        seu nome aqui.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </section>
+
+
+    <!-- =========================================
+         CONFIGURAÇÕES
+    ========================================== -->
+
+    <section id="settingsScreen" class="screen">
+
+        <header class="top-bar">
+
+            <button
+                class="icon-button"
+                onclick="openScreen('homeScreen')"
+            >
+                ←
+            </button>
+
+            <h2>
+                ⚙️ CONFIGURAÇÕES
+            </h2>
+
+            <div class="header-space"></div>
+
+        </header>
+
+
+        <main class="page-container">
+
+            <div class="settings-card">
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <h3>
+                            🔊 Sons
+                        </h3>
+
+                        <p>
+                            Sons ao selecionar e encontrar palavras.
+                        </p>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="soundSetting"
+                            onchange="updateSoundSetting()"
+                        >
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <h3>
+                            👓 Modo Confortável
+                        </h3>
+
+                        <p>
+                            Letras e botões maiores.
+                        </p>
+
+                    </div>
+
+                    <label class="switch">
+
+                        <input
+                            type="checkbox"
+                            id="comfortableMode"
+                            onchange="toggleComfortableMode()"
+                        >
+
+                        <span class="slider"></span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="setting-row">
+
+                    <div>
+
+                        <h3>
+                            🔤 Tamanho das letras
+                        </h3>
+
+                        <p>
+                            Ajuste conforme sua preferência.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="font-controls">
+
+                    <button onclick="changeFontSize(-1)">
+                        A-
+                    </button>
+
+                    <span id="fontSizeDisplay">
+                        Normal
+                    </span>
+
+                    <button onclick="changeFontSize(1)">
+                        A+
+                    </button>
+
+                </div>
+
+            </div>
+            <section class="text-import-box">
+
+    <h2>📚 Criar caça-palavras</h2>
+
+    <p>
+        Cole um texto ou escolha um arquivo.
+        O jogo encontrará automaticamente as palavras.
+    </p>
+
+    <textarea
+        id="sourceText"
+        placeholder="Cole seu texto aqui..."
+    ></textarea>
+
+    <div class="import-buttons">
+
+        <label class="file-button">
+            📄 Escolher arquivo
+            <input
+                type="file"
+                id="textFile"
+                accept=".txt,text/plain"
+                hidden
+            >
+        </label>
+
+        <button
+            onclick="processSourceText()"
+        >
+            ✨ Criar palavras
+        </button>
+
+    </div>
+
+    <div id="importResult"></div>
+
+</section>
+
+        </main>
+
+    </section>
+
+
+    <!-- =========================================
+         MODAL DE NOVO RECORDE
+    ========================================== -->
+
+    <div
+        id="recordModal"
+        class="modal"
+    >
+
+        <div class="modal-content">
+
+            <div class="record-trophy">
+                🏆
+            </div>
+
+            <h2>
+                NOVO RECORDE!
+            </h2>
+
+            <p>
+                Parabéns! Você conquistou um lugar
+                no Hall da Fama.
+            </p>
+
+            <div class="record-time">
+
+                ⏱ <span id="recordTime">
+                    00:00
+                </span>
+
+            </div>
+
+            <label for="playerName">
+
+                Como você quer ser lembrado?
+
+            </label>
+
+            <input
+                type="text"
+                id="playerName"
+                maxlength="15"
+                placeholder="Digite seu nome"
+            >
+
+            <button
+                class="menu-button primary"
+                onclick="saveRecord()"
+            >
+                🏆 SALVAR NO HALL
+            </button>
+
+            <button
+                class="text-button"
+                onclick="closeRecordModal()"
+            >
+                Pular por enquanto
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>
+```
