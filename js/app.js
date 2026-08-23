@@ -830,32 +830,30 @@ function getCellFromPoint(x, y) {
             y
         );
 
-
-    if (
-        !element ||
-        !element.classList.contains(
-            "letter-cell"
-        )
-    ) {
-
+    if (!element) {
         return null;
-
     }
 
+    const cell =
+        element.closest(".letter-cell");
+
+    if (!cell) {
+        return null;
+    }
 
     return {
 
         row:
             Number(
-                element.dataset.row
+                cell.dataset.row
             ),
 
         col:
             Number(
-                element.dataset.col
+                cell.dataset.col
             ),
 
-        element
+        element: cell
 
     };
 
